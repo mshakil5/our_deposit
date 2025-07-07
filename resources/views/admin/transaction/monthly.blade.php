@@ -12,6 +12,11 @@
                         <h3 class="card-title">All Transaction</h3>
                     </div>
                     <div class="card-body">
+
+                        <div style="margin-bottom: 20px;">
+                            <a href="{{ route('deposits.export') }}" class="btn btn-primary">Export to PDF</a>
+                        </div>
+
                         <table id="example1" class="table table-bordered table-striped">
                             <thead>
                                 <tr>

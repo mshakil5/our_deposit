@@ -34,6 +34,7 @@ Route::get('/blog/{slug}', [FrontendController::class, 'showBlogDetails'])->name
 
 Route::get('/download-report', [ReportController::class, 'downloadPDF'])->name('singleReport');
 Route::get('/download-overall-report', [ReportController::class, 'allmemberReport'])->name('allmemberReport');
+Route::get('/deposits/export', [ReportController::class, 'exportMonthlyDepositReport'])->name('deposits.export');
 
 
 Route::group(['prefix' =>'user/', 'middleware' => ['auth', 'is_user']], function(){
