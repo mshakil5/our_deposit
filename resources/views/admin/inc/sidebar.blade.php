@@ -72,5 +72,12 @@
           </a>
       </li>
 
+      <li class="nav-item">
+          <a href="{{ route('missingDeposit') }}" class="nav-link {{ (request()->is('admin/missing-deposit*')) ? 'active' : '' }}">
+              <i class="nav-icon fas fa-building"></i>
+              <p>History</p>
+          </a>
+      </li>
+
     </ul>
   </nav>

@@ -80,7 +80,7 @@ class TransactionController extends Controller
     public function missingDeposit()
     {
 
-        $users = User::all();
+        $users = User::where('is_type', '0')->where('status', 1)->orderby('id','DESC')->get();
 
         // Fetch deposits grouped by month and user
         $deposits = Transaction::select(
@@ -97,22 +97,38 @@ class TransactionController extends Controller
 
         // Prepare the report data
         $report = [];
+        $columnSums = []; // For column-wise sums (total per month)
+        $rowSums = []; // For row-wise sums (total per user)
+
+        // Initialize row sums
+        foreach ($users as $user) {
+            $rowSums[$user->id] = 0;
+        }
+
+        // Process deposits and calculate sums
         foreach ($months as $month) {
+            $columnSums[$month] = 0; // Initialize column sum for the month
             $report[$month] = [];
+
             foreach ($users as $user) {
                 $deposit = $deposits[$month]->firstWhere('user_id', $user->id);
+                $amount = $deposit ? $deposit->total_amount : 0;
+
                 $report[$month][$user->id] = [
-                    'user_name' => $user->name, // Adjust based on your User model
+                    'user_name' => $user->name,
                     'deposited' => $deposit ? true : false,
-                    'amount' => $deposit ? $deposit->total_amount : 0,
+                    'amount' => $amount,
                 ];
+
+                // Update sums
+                $columnSums[$month] += $amount; // Add to column sum
+                $rowSums[$user->id] += $amount; // Add to row sum
             }
         }
 
-        dd($report );
 
         // Pass data to the view
-        return view('deposits.report', compact('report', 'users', 'months'));
+        return view('admin.transaction.monthly', compact('report', 'users', 'months', 'columnSums', 'rowSums'));
 
     }
 
