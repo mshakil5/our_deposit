@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
@@ -78,7 +79,41 @@ class TransactionController extends Controller
 
     public function missingDeposit()
     {
-        
+
+        $users = User::all();
+
+        // Fetch deposits grouped by month and user
+        $deposits = Transaction::select(
+            DB::raw('DATE_FORMAT(STR_TO_DATE(date, "%Y-%m-%d"), "%Y-%m") as month'),
+            'user_id',
+            DB::raw('SUM(amount) as total_amount')
+        )
+            ->groupBy('month', 'user_id')
+            ->get()
+            ->groupBy('month');
+
+        // Get unique months from deposits
+        $months = $deposits->keys()->sort()->values();
+
+        // Prepare the report data
+        $report = [];
+        foreach ($months as $month) {
+            $report[$month] = [];
+            foreach ($users as $user) {
+                $deposit = $deposits[$month]->firstWhere('user_id', $user->id);
+                $report[$month][$user->id] = [
+                    'user_name' => $user->name, // Adjust based on your User model
+                    'deposited' => $deposit ? true : false,
+                    'amount' => $deposit ? $deposit->total_amount : 0,
+                ];
+            }
+        }
+
+        dd($report );
+
+        // Pass data to the view
+        return view('deposits.report', compact('report', 'users', 'months'));
+
     }
 
 }
