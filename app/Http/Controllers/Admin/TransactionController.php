@@ -1,0 +1,84 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Transaction;
+use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+
+class TransactionController extends Controller
+{
+    public function index($id = null)
+    {
+        $data = Transaction::orderby('id', 'DESC')
+        ->when($id, function($query) use ($id) {
+            return $query->where('user_id', $id);
+        })
+        ->where('status', 1)->get();
+        return view('admin.transaction.index', compact('data'));
+    }
+
+    public function pending()
+    {
+        $data = Transaction::orderby('id', 'DESC')->where('status', 0)->get();
+        return view('admin.transaction.pending', compact('data'));
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $data = Transaction::findOrFail($request->tranId);
+        $data->status = $request->status;
+        $data->save();
+
+        return response()->json(['status' => 200, 'message' => 'Status updated successfully.']);
+    }
+
+    public function edit($id)
+    {
+        $data = Transaction::whereId($id)->first();
+        return response()->json(['status' => 200, 'data' => $data]);
+    }
+
+    public function update(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|max:255',
+            'amount' => 'required',
+            'document' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 422, 'message' => $validator->errors()->first()]);
+        }
+
+        $data = Transaction::findOrFail($request->codeid);
+        $data->date = $request->date;
+        $data->last_digit = $request->last_digit;
+        $data->amount = $request->amount;
+        $data->fine = $request->fine;
+        $data->note = $request->note;
+
+        if ($request->hasFile('document')) {
+            if ($data->document && file_exists(public_path($data->document))) {
+                unlink(public_path($data->document));
+            }
+            $image = $request->file('document');
+            $imageName = uniqid() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images/document'), $imageName);
+            $data->document = '/images/document/' . $imageName;
+        }
+
+        $data->save();
+
+        return response()->json(['status' => 200, 'message' => 'Data updated successfully.']);
+    }
+
+    public function missingDeposit()
+    {
+        
+    }
+
+}
