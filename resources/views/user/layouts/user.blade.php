@@ -204,11 +204,11 @@
               </h5>
             </div>
           </div>
-          <div class="col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3">
+          <div class="col-lg-8 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3">
             <div class="nav-wrapper position-relative end-0">
               <ul class="nav nav-pills nav-fill p-1 bg-transparent" role="tablist">
                 <li class="nav-item">
-                  <a class="nav-link mb-0 px-0 py-1 active " href="{{route('singleReport')}}">
+                  <a class="nav-link mb-0 px-0 py-1 " href="{{route('singleReport')}}">
                     <svg class="text-dark" width="16px" height="16px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                       <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                         <g transform="translate(-2319.000000, -291.000000)" fill="#FFFFFF" fill-rule="nonzero">
@@ -246,7 +246,7 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link mb-0 px-0 py-1 " data-bs-toggle="tab" href="javascript:;" role="tab" aria-selected="false">
+                  <a class="nav-link mb-0 px-0 py-1 " href="{{route('deposits.export')}}">
                     <svg class="text-dark" width="16px" height="16px" viewBox="0 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                       <title>Monthly Report</title>
                       <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -263,9 +263,32 @@
                         </g>
                       </g>
                     </svg>
-                    <span class="ms-1">Settings</span>
+                    <span class="ms-1">Monthly Report</span>
                   </a>
                 </li>
+
+                <li class="nav-item">
+                  <a class="nav-link {{ (request()->is('user/installment')) ? 'active' : '' }} " href="{{route('user.installment')}}">
+                    <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <title>Transaction</title>
+                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                        <g transform="translate(-2020.000000, -442.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                          <g transform="translate(1716.000000, 291.000000)">
+                            <g transform="translate(304.000000, 151.000000)">
+                              <polygon class="color-background" opacity="0.596981957" points="18.0883333 15.7316667 11.1783333 8.82166667 13.3333333 6.66666667 6.66666667 0 0 6.66666667 6.66666667 13.3333333 8.82166667 11.1783333 15.315 17.6716667">
+                              </polygon>
+                                <path class="color-background opacity-6" d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z"></path>
+                                <path class="color-background" d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z"></path>
+                              </g>
+                            </g>
+                          </g>
+                        </g>
+                      </svg>
+                    <span class="nav-link-text ms-1">Add Money</span>
+                  </a>
+                </li>
+
+
               </ul>
             </div>
           </div>
