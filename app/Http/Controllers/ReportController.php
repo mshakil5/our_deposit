@@ -93,6 +93,7 @@ class ReportController extends Controller
             DB::raw('SUM(amount) as total_amount')
         )
             ->groupBy('year', 'month', 'user_id')
+            ->where('status', 1)
             ->get()
             ->groupBy('year');
 
