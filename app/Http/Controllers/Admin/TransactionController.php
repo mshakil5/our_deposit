@@ -88,7 +88,7 @@ class TransactionController extends Controller
             'user_id',
             DB::raw('SUM(amount) as total_amount')
         )
-            ->groupBy('month', 'user_id')
+            ->groupBy('month', 'user_id')->where('status', 1)
             ->get()
             ->groupBy('month');
 
