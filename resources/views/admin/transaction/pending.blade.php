@@ -105,6 +105,7 @@
                                     <th>Tran. id</th>
                                     <th>Name/Phone</th>
                                     <th>Last Digit</th>
+                                    <th>Note</th>
                                     <th>Document</th>
                                     <th>Amount</th>
                                     <th>Fine</th>
@@ -120,6 +121,7 @@
                                     <td>{{ $tran->tranid }}</td>
                                     <td>{{ $tran->user->name }} <br> {{ $tran->user->phone }}</td>
                                     <td>{{ $tran->last_digit }}</td>
+                                    <td>{{ $tran->note }}</td>
                                     <td>
                                         <a href="{{ asset($tran->document) }}" target="blank">
                                             <img src="{{ asset($tran->document) }}" id="myImg" alt="" style="max-width: 100px; width: 100%; height: auto;">
