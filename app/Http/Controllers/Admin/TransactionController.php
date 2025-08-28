@@ -132,4 +132,63 @@ class TransactionController extends Controller
 
     }
 
+    public function newAccountHistory()
+    {
+
+        $users = User::where('is_type', '0')->where('status', 1)->orderby('id','DESC')->get();
+
+        // Fetch deposits grouped by month and user
+        $deposits = Transaction::select(
+            DB::raw('DATE_FORMAT(STR_TO_DATE(date, "%Y-%m-%d"), "%Y-%m") as month'),
+            'user_id',
+            DB::raw('SUM(amount) as total_amount')
+        )
+        ->where('status', 1)
+        ->whereDate('date', '>', '2025-05-31') // filter after May 2025
+        ->groupBy('month', 'user_id')
+        ->get()
+        ->groupBy('month');
+
+
+        // Get unique months from deposits
+        $months = $deposits->keys()->sort()->values();
+
+        // Prepare the report data
+        $report = [];
+        $columnSums = []; // For column-wise sums (total per month)
+        $rowSums = []; // For row-wise sums (total per user)
+
+        // Initialize row sums
+        foreach ($users as $user) {
+            $rowSums[$user->id] = 0;
+        }
+
+        // Process deposits and calculate sums
+        foreach ($months as $month) {
+            $columnSums[$month] = 0; // Initialize column sum for the month
+            $report[$month] = [];
+
+            foreach ($users as $user) {
+                $deposit = $deposits[$month]->firstWhere('user_id', $user->id);
+                $amount = $deposit ? $deposit->total_amount : 0;
+
+                $report[$month][$user->id] = [
+                    'user_name' => $user->name,
+                    'deposited' => $deposit ? true : false,
+                    'amount' => $amount,
+                ];
+
+                // Update sums
+                $columnSums[$month] += $amount; // Add to column sum
+                $rowSums[$user->id] += $amount; // Add to row sum
+            }
+        }
+
+
+        // Pass data to the view
+        return view('admin.transaction.monthly', compact('report', 'users', 'months', 'columnSums', 'rowSums'));
+
+    }
+
+
 }

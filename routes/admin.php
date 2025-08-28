@@ -55,6 +55,7 @@ Route::group(['prefix' =>'admin/', 'middleware' => ['auth', 'is_admin']], functi
     Route::post('/transaction-update', [TransactionController::class, 'update']);
 
     Route::get('/missing-deposit', [TransactionController::class, 'missingDeposit'])->name('missingDeposit');
+    Route::get('/new-account-history', [TransactionController::class, 'newAccountHistory'])->name('newAccountHistory');
         
 });
   

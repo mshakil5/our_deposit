@@ -1,5 +1,6 @@
 <?php
-  
+
+use App\Http\Controllers\DiscussController;
 use Illuminate\Support\Facades\Route;
   
 use App\Http\Controllers\HomeController;
@@ -47,6 +48,17 @@ Route::group(['prefix' =>'user/', 'middleware' => ['auth', 'is_user']], function
     Route::get('/installment', [ProfileController::class, 'addMoney'])->name('user.installment');
     Route::post('/installment', [ProfileController::class, 'addMoneyStore'])->name('user.installmentStore');
     Route::get('/installment/{id}', [ProfileController::class, 'tranDelete'])->name('user.installmentDelete');
+
+
+    Route::get('/all-discussion', [DiscussController::class, 'getAllDiscussion'])->name('user.allDiscussion');
+    Route::get('/get-my-discussion', [DiscussController::class, 'getMyDiscussion'])->name('user.mydiscussion');
+    Route::post('/get-my-discussion', [DiscussController::class, 'discussionStore'])->name('user.discussionStore');
+    Route::get('/get-my-discussion/{id}', [DiscussController::class, 'discussionDelete'])->name('user.discussionDelete');
+    Route::get('/get-my-discussion-edit/{id}', [DiscussController::class, 'discussionEdit'])->name('user.discussionEdit');
+    Route::post('/update-my-discussion', [DiscussController::class, 'discussionUpdate'])->name('user.discussionUpdate');
+
+
+
 });
   
 

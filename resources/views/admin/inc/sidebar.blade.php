@@ -79,5 +79,12 @@
           </a>
       </li>
 
+      <li class="nav-item">
+          <a href="{{ route('newAccountHistory') }}" class="nav-link {{ (request()->is('admin/new-account-history')) ? 'active' : '' }}">
+              <i class="nav-icon fas fa-building"></i>
+              <p>New Account History</p>
+          </a>
+      </li>
+
     </ul>
   </nav>
