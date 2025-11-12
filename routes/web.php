@@ -47,6 +47,7 @@ Route::group(['prefix' =>'user/', 'middleware' => ['auth', 'is_user']], function
     
     Route::get('/installment', [ProfileController::class, 'addMoney'])->name('user.installment');
     Route::post('/installment', [ProfileController::class, 'addMoneyStore'])->name('user.installmentStore');
+    Route::post('/installment-update', [ProfileController::class, 'installmentUpdate'])->name('user.installmentUpdate');
     Route::get('/installment/{id}', [ProfileController::class, 'tranDelete'])->name('user.installmentDelete');
 
 

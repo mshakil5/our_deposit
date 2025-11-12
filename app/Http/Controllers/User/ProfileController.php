@@ -142,6 +142,46 @@ class ProfileController extends Controller
 
     }
 
+    public function installmentUpdate(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:transactions,id',
+            'date' => 'required|date',
+            'amount' => 'required|numeric',
+            'last_digit' => 'nullable|string',
+            'note' => 'nullable|string',
+            'document' => 'nullable|image|max:5024'
+        ]);
+
+        $tran = Transaction::findOrFail($request->id);
+
+        $tran->date = $request->date;
+        $tran->amount = $request->amount;
+        $tran->last_digit = $request->last_digit;
+        $tran->note = $request->note;
+
+        if ($request->hasFile('document')) {
+            if ($tran->document && file_exists(public_path($tran->document))) {
+                @unlink(public_path($tran->document));
+            }
+
+            $file = $request->file('document');
+            $path = 'images/users/';
+            $filename = time().'_'.$file->getClientOriginalName();
+            $file->move(public_path($path), $filename);
+            $tran->document = $path.$filename;
+        }
+
+        $tran->save();
+
+        // 👇 This must return JSON, not redirect
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction updated successfully!'
+        ]);
+    }
+
+
     public function tranDelete($id)
     {
 

@@ -23,19 +23,41 @@
               @endif
 
               @foreach ($trans as $tran)
-              <li class="list-group-item border-0 d-flex p-4 mb-2 bg-gray-100 border-radius-lg">
-                <div class="d-flex flex-column">
-                  <p class="text-xs"><b>Transaction: </b>#{{$tran->tranid}}</p>
-                  <span class="text-xs"><b>Amount: </b>{{$tran->amount}} <br> <b>Fine: </b>{{$tran->due}} </span>
-                  <span class="text-xs">Date: <span class="text-dark ms-sm-2 font-weight-bold">{{$tran->date}}</span></span>
-                  <span class="text-xs">Last Digit: <span class="text-dark ms-sm-2 font-weight-bold">{{$tran->last_digit}}</span></span>
-                  <span class="text-xs">Note: <span class="text-dark font-weight-bold ms-sm-2">{{$tran->note}}</span></span>
-                </div>
-                <div class="ms-auto text-end">
-                  <a class="btn btn-link text-danger text-gradient px-3 mb-0" href="{{route('user.installmentDelete', $tran->id)}}"><i class="far fa-trash-alt me-2"></i>Delete</a>
-                  {{-- <a class="btn btn-link text-dark px-3 mb-0" href="javascript:;"><i class="fas fa-pencil-alt text-dark me-2" aria-hidden="true"></i>Edit</a> --}}
-                </div>
-              </li>
+                <li class="list-group-item border-0 d-flex p-4 mb-2 bg-gray-100 border-radius-lg">
+                  <div class="d-flex flex-column">
+                    <p class="text-xs"><b>Transaction: </b>#{{$tran->tranid}}</p>
+                    <span class="text-xs"><b>Amount: </b>{{$tran->amount}} <br> <b>Fine: </b>{{$tran->due}}</span>
+                    <span class="text-xs">Date: <span class="text-dark ms-sm-2 font-weight-bold">{{$tran->date}}</span></span>
+                    <span class="text-xs">Last Digit: <span class="text-dark ms-sm-2 font-weight-bold">{{$tran->last_digit}}</span></span>
+                    <span class="text-xs">Note: <span class="text-dark font-weight-bold ms-sm-2">{{$tran->note}}</span></span>
+
+                    <!-- Image preview link -->
+                    <a href="javascript:void(0);" 
+                      class="openImageModal" 
+                      data-img="{{ asset($tran->document) }}">
+                      <img src="{{ asset($tran->document) }}" 
+                          alt="Document" 
+                          style="width: 300px; height: auto; cursor:pointer;">
+                    </a>
+                  </div>
+                  <div class="ms-auto text-end">
+                    <a class="btn btn-link text-danger text-gradient px-3 mb-0" href="{{route('user.installmentDelete', $tran->id)}}">
+                      <i class="far fa-trash-alt me-2"></i>Delete
+                    </a>
+                    <a class="btn btn-link text-dark px-3 mb-0 editButton"
+                      href="javascript:void(0);"
+                      data-id="{{ $tran->id }}"
+                      data-tranid="{{ $tran->tranid }}"
+                      data-amount="{{ $tran->amount }}"
+                      data-date="{{ $tran->date }}"
+                      data-last_digit="{{ $tran->last_digit }}"
+                      data-note="{{ $tran->note }}"
+                      data-document="{{ asset($tran->document) }}">
+                      <i class="fas fa-pencil-alt text-dark me-2"></i>Edit
+                    </a>
+
+                  </div>
+                </li>
               @endforeach
               
 
@@ -45,6 +67,84 @@
           </div>
         </div>
       </div>
+
+
+      <!-- Modal for showing image -->
+      <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content">
+            <div class="modal-body text-center">
+              <img id="modalImage" src="" alt="Document" class="img-fluid rounded">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal for Editing Transaction -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editModalLabel">Edit Transaction</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+
+            <div id="editSuccessMessage"></div>
+
+
+            <form id="editForm" enctype="multipart/form-data">
+              @csrf
+              <input type="hidden" id="edit_id" name="id">
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label>Date</label>
+                  <input type="date" class="form-control" id="edit_date" name="date" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label>Last Digit</label>
+                  <input type="text" class="form-control" id="edit_last_digit" name="last_digit">
+                </div>
+
+                <div class="col-md-12 mb-3">
+                  <label>Amount + Fine</label>
+                  <input type="number" class="form-control" id="edit_amount" name="amount" required>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                  <label>Note</label>
+                  <input type="text" class="form-control" id="edit_note" name="note">
+                </div>
+
+                <div class="col-md-12 mb-3">
+                  <label>Existing Document</label><br>
+                  <img id="edit_old_image" src="" alt="Old Document" class="img-fluid rounded" style="max-width:200px">
+                </div>
+
+                <div class="col-md-12 mb-3">
+                  <label>Change Document (<span style="color:red">optional</span>)</label>
+                  <input type="file" class="form-control" id="edit_document" name="document">
+                </div>
+              </div>
+
+              <div class="text-end">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
 
       
       <div class="col-md-6 mt-4">
@@ -187,5 +287,105 @@
       });
   });
   </script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const imageLinks = document.querySelectorAll(".openImageModal");
+    const modalImage = document.getElementById("modalImage");
+    const modal = new bootstrap.Modal(document.getElementById("imageModal"));
+
+    imageLinks.forEach(link => {
+      link.addEventListener("click", function() {
+        const imgSrc = this.getAttribute("data-img");
+        modalImage.src = imgSrc;
+        modal.show();
+      });
+    });
+  });
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const editButtons = document.querySelectorAll(".editButton");
+  const editModal = new bootstrap.Modal(document.getElementById("editModal"));
+
+  editButtons.forEach(btn => {
+    btn.addEventListener("click", function() {
+      // Fill modal fields with current data
+      document.getElementById("edit_id").value = this.dataset.id;
+      document.getElementById("edit_date").value = this.dataset.date;
+      document.getElementById("edit_last_digit").value = this.dataset.last_digit;
+      document.getElementById("edit_amount").value = this.dataset.amount;
+      document.getElementById("edit_note").value = this.dataset.note;
+      document.getElementById("edit_old_image").src = this.dataset.document;
+
+      // Show modal
+      editModal.show();
+    });
+  });
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  
+  document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch("{{ route('user.installmentUpdate') }}", {
+      method: "POST",
+      headers: {
+        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: formData
+    })
+    .then(async res => {
+      const text = await res.text();
+      console.log("Raw response:", text);
+
+      try {
+        const data = JSON.parse(text);
+
+        if (data.success) {
+          // ✅ Show success message
+          const msgBox = document.getElementById('editSuccessMessage');
+          msgBox.innerHTML = `
+            <section class="px-4">
+              <div class="row">
+                <div class="alert alert-success text-light" id="successMessage">
+                  ${data.message ?? 'Transaction updated successfully!'}
+                </div>
+              </div>
+            </section>
+          `;
+
+          // Close modal after 1.5s (optional)
+          setTimeout(() => {
+            const modalEl = document.getElementById('editModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+          }, 1500);
+
+          location.reload();
+          
+        } else {
+          alert(data.message ?? "Update failed.");
+        }
+
+      } catch (err) {
+        console.error("Invalid JSON:", err);
+      }
+    })
+    .catch(err => console.error("Fetch error:", err));
+  });
+
+});
+</script>
+
 
 @endsection
