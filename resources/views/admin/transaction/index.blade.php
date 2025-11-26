@@ -2,7 +2,7 @@
 
 @section('content')
 
-
+<input type="hidden" id="userID" value="{{ $id ?? ''}}">
 <section class="content" id="contentContainer">
     <div class="container-fluid">
         <div class="row">
@@ -12,7 +12,7 @@
                         <h3 class="card-title">All Transaction</h3>
                     </div>
                     <div class="card-body">
-                        <table id="example1" class="table table-bordered table-striped">
+                        <table id="allTran" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>Sl</th>
@@ -27,51 +27,8 @@
                                     <th>Status</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @php
-                                    $total = 0;
-                                @endphp
-                                @foreach ($data as $key => $tran)
-                                <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td>{{ $tran->date }}</td>
-                                    <td>{{ $tran->tranid }}</td>
-                                    <td>{{ $tran->user->name }} <br> {{ $tran->user->phone }}</td>
-                                    <td>{{ $tran->last_digit }}</td>
-                                    <td>{{ $tran->note }}</td>
-                                    <td>
-                                        <a href="{{ asset($tran->document) }}" target="blank">
-                                            <img src="{{ asset($tran->document) }}" id="myImg" alt="" style="max-width: 100px; width: 100%; height: auto;">
-                                        </a>
-                                        
-                                    </td>
-                                    <td>{{ $tran->amount }}</td>
-                                    <td>{{ $tran->fine }}</td>
-                                    <td>
-                                        <div class="custom-control custom-switch">
-                                            <input type="checkbox" class="custom-control-input toggle-status" id="customSwitchStatus{{ $tran->id }}" data-id="{{ $tran->id }}" {{ $tran->status == 1 ? 'checked' : '' }}>
-                                            <label class="custom-control-label" for="customSwitchStatus{{ $tran->id }}"></label>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @php
-                                    $total = $total + $tran->amount;
-                                @endphp
-                                @endforeach
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                    <th>Total Deposit</th>
-                                    <th>{{$total}}</th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                            </tfoot>
+                            <tbody></tbody>
+
                         </table>
                     </div>
                 </div>
@@ -120,23 +77,7 @@
             });
         });
 
-        $(function() {
-            $("#example1").DataTable({
-                "responsive": true,
-                "lengthChange": false,
-                "autoWidth": false,
-                "buttons": ["copy", "csv", "excel", "pdf", "print"]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            $('#example2').DataTable({
-                "paging": true,
-                "lengthChange": false,
-                "searching": false,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "responsive": true,
-            });
-        });
+
 
         $("#image").change(function(e){
             var reader = new FileReader();
@@ -145,6 +86,57 @@
             };
             reader.readAsDataURL(this.files[0]);
         });
+
     });
 </script>
+
+
+<script>
+$(document).ready(function() {
+
+    var id = $('#userID').val();
+    var ajaxUrl = "{{ url('/admin/transaction/data') }}/" + (id ? id : "");
+
+    $('#allTran').DataTable({
+        processing: true,
+        serverSide: true,
+        pageLength: 50, // 🔥 Show 50 items per page
+
+        ajax: ajaxUrl,
+
+        dom: 'Bfrtip', // 🔥 Enable Buttons
+        buttons: [
+            'copyHtml5',
+            'csvHtml5',
+            'excelHtml5',
+            'pdfHtml5',
+            'print'
+        ],
+
+        order: [],
+
+        columnDefs: [
+            { targets: 0, orderable: false },
+            { targets: [3,6,9], orderable: false }
+        ],
+
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false },
+            { data: 'date', name: 'date' },
+            { data: 'tranid', name: 'tranid' },
+            { data: 'username', name: 'username' },
+            { data: 'last_digit', name: 'last_digit' },
+            { data: 'note', name: 'note' },
+            { data: 'document', name: 'document' },
+            { data: 'amount', name: 'amount' },
+            { data: 'fine', name: 'fine' },
+            { data: 'status_switch', name: 'status_switch', orderable: false }
+        ]
+    });
+
+
+});
+
+</script>
+
 @endsection

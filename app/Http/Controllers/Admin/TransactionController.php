@@ -9,10 +9,59 @@ use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 
 class TransactionController extends Controller
 {
+
+
+    
+    public function getData($id = null)
+    {
+        $data = Transaction::with('user')
+                    ->orderBy('id', 'DESC')
+                    ->when($id, function($q) use ($id){
+                        return $q->where('user_id', $id);
+                    });
+
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->addColumn('username', function($row){
+                return $row->user->name . "<br>" . $row->user->phone;
+            })
+            ->addColumn('document', function($row){
+                return '<a href="'.asset($row->document).'" target="_blank">
+                            <img src="'.asset($row->document).'"
+                                style="max-width:100px;height:auto;">
+                        </a>';
+            })
+            ->addColumn('status_switch', function($row){
+                $checked = $row->status == 1 ? 'checked' : '';
+                return '
+                <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input toggle-status"
+                        id="switch'.$row->id.'" data-id="'.$row->id.'" '.$checked.'>
+                <label class="custom-control-label" for="switch'.$row->id.'"></label>
+                </div>
+                ';
+            })
+            ->rawColumns(['username','document','status_switch']) // IMPORTANT
+            ->make(true);
+    }
+
     public function index($id = null)
+    {
+        return view('admin.transaction.index', compact('id'));
+    }
+
+
+    public function pending()
+    {
+        $data = Transaction::orderby('id', 'DESC')->where('status', 0)->get();
+        return view('admin.transaction.pending', compact('data'));
+    }
+
+    public function indexold($id = null)
     {
         $data = Transaction::orderby('id', 'DESC')
         ->when($id, function($query) use ($id) {
@@ -20,12 +69,6 @@ class TransactionController extends Controller
         })
         ->where('status', 1)->get();
         return view('admin.transaction.index', compact('data'));
-    }
-
-    public function pending()
-    {
-        $data = Transaction::orderby('id', 'DESC')->where('status', 0)->get();
-        return view('admin.transaction.pending', compact('data'));
     }
 
     public function updateStatus(Request $request)

@@ -49,7 +49,13 @@ Route::group(['prefix' =>'admin/', 'middleware' => ['auth', 'is_admin']], functi
 
     
     Route::get('/pending-transaction', [TransactionController::class, 'pending'])->name('pendingtransaction');
+
+    Route::get('transaction/data/{id?}', [TransactionController::class, 'getData'])->name('transaction.data');
     Route::get('/transaction/{id?}', [TransactionController::class, 'index'])->name('alltransaction');
+
+
+
+
     Route::get('/transaction/{id}/edit', [TransactionController::class, 'edit']);
     Route::post('/transaction-status', [TransactionController::class, 'updateStatus'])->name('transaction.updateStatus');
     Route::post('/transaction-update', [TransactionController::class, 'update']);
