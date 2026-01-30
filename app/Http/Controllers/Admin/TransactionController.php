@@ -102,22 +102,28 @@ class TransactionController extends Controller
         $data->date = $request->date;
         $data->last_digit = $request->last_digit;
         $data->amount = $request->amount;
-        $data->fine = $request->fine;
         $data->note = $request->note;
-
-        if ($request->hasFile('document')) {
-            if ($data->document && file_exists(public_path($data->document))) {
-                unlink(public_path($data->document));
-            }
-            $image = $request->file('document');
-            $imageName = uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('images/document'), $imageName);
-            $data->document = '/images/document/' . $imageName;
+        $data->tran_type = $data->tran_type ?? 'Deposit'; // Ensure type is set
+        $data->payment_type = $data->payment_type ?? 'Bank';
+        
+        // Logic for Fine: Create new row if fine is provided
+        if ($request->fine > 0) {
+            $fine = new Transaction();
+            $fine->user_id = $data->user_id;
+            $fine->tranid = $data->tranid . '-' . rand(10, 99); // Unique ID
+            $fine->date = $request->date;
+            $fine->amount = $request->fine; // Fine value goes to 'amount' column
+            $fine->fine = 0; // Keep fine column 0
+            $fine->tran_type = 'Fine';
+            $fine->payment_type = 'Bank';
+            $fine->note = "Fine added to transaction " . $data->tranid;
+            $fine->save();
         }
 
+        $data->fine = 0; // Always keep the main record's fine column 0
         $data->save();
 
-        return response()->json(['status' => 200, 'message' => 'Data updated successfully.']);
+        return response()->json(['status' => 200, 'message' => 'Data updated and Fine processed.']);
     }
 
     public function missingDeposit()
@@ -231,6 +237,43 @@ class TransactionController extends Controller
         // Pass data to the view
         return view('admin.transaction.monthly', compact('report', 'users', 'months', 'columnSums', 'rowSums'));
 
+    }
+
+
+    public function migrateOldFines()
+    {
+        
+        try {
+            DB::transaction(function () {
+
+                // 2. Find all records where fine is still sitting in the column
+                $transactionsWithFines = Transaction::where('fine', '>', 0)->get();
+
+                foreach ($transactionsWithFines as $original) {
+                    // Create the new separate Fine row
+                    $fineRow = new Transaction();
+                    $fineRow->user_id      = $original->user_id;
+                    $fineRow->tranid       = $original->tranid . rand(10, 99). 'F';
+                    $fineRow->date         = $original->date;
+                    $fineRow->amount       = $original->fine; // Move fine value to amount
+                    $fineRow->document     = $original->document; // Move fine value to amount
+                    $fineRow->fine         = 0;
+                    $fineRow->tran_type    = 'Fine';
+                    $fineRow->payment_type = 'Bank';
+                    $fineRow->note         = 'Auto-generated fine from trans: ' . $original->tranid;
+                    $fineRow->save();
+
+                    // 3. Reset the fine on the original row
+                    $original->fine = 0;
+                    $original->save();
+                }
+            });
+
+            return "Migration successful! All fines converted to individual rows.";
+
+        } catch (\Exception $e) {
+            return "Error during migration: " . $e->getMessage();
+        }
     }
 
 

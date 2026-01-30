@@ -53,9 +53,6 @@ Route::group(['prefix' =>'admin/', 'middleware' => ['auth', 'is_admin']], functi
     Route::get('transaction/data/{id?}', [TransactionController::class, 'getData'])->name('transaction.data');
     Route::get('/transaction/{id?}', [TransactionController::class, 'index'])->name('alltransaction');
 
-
-
-
     Route::get('/transaction/{id}/edit', [TransactionController::class, 'edit']);
     Route::post('/transaction-status', [TransactionController::class, 'updateStatus'])->name('transaction.updateStatus');
     Route::post('/transaction-update', [TransactionController::class, 'update']);
@@ -63,5 +60,8 @@ Route::group(['prefix' =>'admin/', 'middleware' => ['auth', 'is_admin']], functi
     Route::get('/missing-deposit', [TransactionController::class, 'missingDeposit'])->name('missingDeposit');
     Route::get('/new-account-history', [TransactionController::class, 'newAccountHistory'])->name('newAccountHistory');
         
+    Route::get('/fix-fine-data', [TransactionController::class, 'migrateOldFines'])->middleware('auth');
+
+
 });
   
