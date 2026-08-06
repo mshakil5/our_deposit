@@ -6,9 +6,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Laravel\Passport\HasApiTokens;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 
 class User extends Authenticatable
 {
@@ -75,6 +76,24 @@ class User extends Authenticatable
     public function transactions()
     {
         return $this->hasMany(Transaction::class)->where('status', 1);
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        // Optional: If you want to send a custom API email template, 
+        // you can create a custom Notification class here. 
+        // But to keep it simple and just show the token in default email:
+        
+        $notification = new ResetPasswordNotification($token);
+        $notification->createUrlUsing(function ($token, $user) {
+            // This changes the link in the email to just show the token
+            // Or you can point it to your frontend URL:
+            // return env('FRONTEND_URL') . '/reset-password?token=' . $token . '&email=' . urlencode($user->email);
+            
+            return "Your password reset token is: " . $token;
+        });
+
+        $this->notify($notification);
     }
 
 }
